@@ -91,7 +91,7 @@ support:
 # Key used to encrypt cookies, should be unique per network instance.
 secret_key: 'this_is_a_secret_please_change_me'
 # Name of this network.
-name: 'e-AMUSEMENT Network'
+name: 'e-amusement Network'
 # Administrative contact for this network.
 email: 'nobody@nowhere.com'
 # Cache DIR, should point somewhere other than /tmp for production instances.

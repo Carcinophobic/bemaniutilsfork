@@ -167,7 +167,7 @@ class APIClient:
 def main() -> None:
     # Global arguments
     parser = argparse.ArgumentParser(
-        description="A sample API client for an e-AMUSEMENT API provider."
+        description="A sample API client for an e-amusement API provider."
     )
     parser.add_argument(
         "-t",

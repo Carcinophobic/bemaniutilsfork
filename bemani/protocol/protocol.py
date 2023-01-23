@@ -11,13 +11,13 @@ from bemani.protocol.node import Node
 
 class EAmuseException(Exception):
     """
-    An exception thrown when we encounter an error with E-Amusement encapsulation.
+    An exception thrown when we encounter an error with e-amusement encapsulation.
     """
 
 
 class EAmuseProtocol:
     """
-    A wrapper object that encapsulates encoding/decoding the E-Amusement protocol by Konami.
+    A wrapper object that encapsulates encoding/decoding the e-amusement protocol by Konami.
     """
 
     SHARED_SECRET: Final[

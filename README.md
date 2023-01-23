@@ -106,7 +106,7 @@ A command-line utility for converting between card numbers written on the back o
 card and the card ID stored in the RFID of the card. Run it like `./cardconvert --help`
 to see how to use this. This will sanitize input, so you can feed it card numbers
 with or without spaces, and you can mix up 1 and I as well as 0 and O, and it will
-properly handle decoding. This supports both new and old style e-Amusement cards but
+properly handle decoding. This supports both new and old style e-amusement cards but
 does not support the cross-play network cards with five groups of digits on the back
 of the card.
 

@@ -28,7 +28,7 @@ def format_news(news: News) -> Dict[str, Any]:
 @loginrequired
 def viewhome() -> Response:
     return render_react(
-        g.config.get("name", "e-AMUSEMENT Network"),
+        g.config.get("name", "e-amusement Network"),
         "home.react.js",
         {
             "news": [format_news(news) for news in g.data.local.network.get_all_news()],

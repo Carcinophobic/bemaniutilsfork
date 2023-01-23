@@ -230,7 +230,7 @@ class Config(dict):
 
     @property
     def name(self) -> str:
-        return str(self.get("name", "e-AMUSEMENT Network"))
+        return str(self.get("name", "e-amusement Network"))
 
     @property
     def email(self) -> str:
