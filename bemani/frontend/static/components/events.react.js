@@ -116,7 +116,7 @@ var UnauthorizedClientEvent = createReactClass({
                         <pre className="inline">{event.data.pcbid}</pre>
                     </div>
                     <div>
-                        <div className="inline">IP Addres:</div>
+                        <div className="inline">IP Address:</div>
                         <pre className="inline">{event.data.ip}</pre>
                     </div>
                 </td>
@@ -145,7 +145,7 @@ var PCBEvent = createReactClass({
                         <pre className="inline">{event.data.pcbid}</pre>
                     </div>
                     <div>
-                        <div className="inline">IP Addres:</div>
+                        <div className="inline">IP Address:</div>
                         <pre className="inline">{event.data.ip}</pre>
                     </div>
                     <div>
