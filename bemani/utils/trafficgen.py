@@ -30,6 +30,7 @@ from bemani.client.popn import (
     PopnMusicUsaNekoClient,
     PopnMusicPeaceClient,
     PopnMusicKaimeiClient,
+    PopnMusicUniLabClient,
 )
 from bemani.client.ddr import (
     DDRX2Client,
@@ -108,6 +109,12 @@ def get_client(
         )
     if game == "pnm-kaimei":
         return PopnMusicKaimeiClient(
+            proto,
+            pcbid,
+            config,
+        )
+    if game == "pnm-unilab":
+        return PopnMusicUniLabClient(
             proto,
             pcbid,
             config,
@@ -372,6 +379,12 @@ def mainloop(
             "old_profile_model": "M39:J:B:A",
             "avs": "2.15.8 r6631",
         },
+        "pnm-unilab": {
+            "name": "Pop'n Music UniLab",
+            "model": "M39:J:B:A:2022091300",
+            "old_profile_model": "M39:J:B:A",
+            "avs": "2.15.8 r6631",
+        },
         "jubeat-saucer": {
             "name": "Jubeat Saucer",
             "model": "L44:J:A:A:2014012802",
@@ -632,6 +645,7 @@ def main() -> None:
         "pnm-24": "pnm-usaneko",
         "pnm-25": "pnm-peace",
         "pnm-26": "pnm-kaimei",
+        "pnm-27": "pnm-unilab",
         "iidx-20": "iidx-tricoro",
         "iidx-21": "iidx-spada",
         "iidx-22": "iidx-pendual",
