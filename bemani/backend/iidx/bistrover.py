@@ -4,7 +4,6 @@ import struct
 from typing import Optional, Dict, Any, List, Tuple
 from typing_extensions import Final
 
-from bemani.backend.iidx.course import IIDXCourse
 from bemani.backend.iidx.base import IIDXBase
 from bemani.backend.iidx.heroicverse import IIDXHeroicVerse
 
