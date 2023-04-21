@@ -6,7 +6,7 @@ from typing import Any, Dict, List, Optional, Tuple
 from typing_extensions import Final
 
 from bemani.backend.popn.base import PopnMusicBase
-from bemani.common import Time, ID, Profile, ValidatedDict, Parallel
+from bemani.common import Time, ID, Profile, ValidatedDict, Parallel, GameConstants
 from bemani.data import Data, UserID, Achievement, Link
 from bemani.protocol import Node
 
@@ -821,6 +821,47 @@ class PopnMusicModernBase(PopnMusicBase, ABC):
                 )
 
         return Node.void("player24")
+
+    def handle_lobby24_getList_request(self, request: Node) -> Node:
+        root = Node.void('lobby24')
+
+        for lobby in self.data.local.lobby.get_all_lobbies(GameConstants.POPN_MUSIC, self.version):
+            list = Node.void('list')
+
+            list.add_child(Node.u32('no', lobby[1]['no']))
+            list.add_child(Node.u32('time', lobby[1]['time']))
+            list.add_child(Node.u32('ip', lobby[1]['ip']))
+            list.add_child(Node.u32('local_ip', lobby[1]['local_ip']))
+            list.add_child(Node.u16('port', lobby[1]['port']))
+            list.add_child(Node.s16('music', lobby[1]['music']))
+            list.add_child(Node.u8('sheet', lobby[1]['sheet']))
+            list.add_child(Node.u8('is_ojama', lobby[1]['is_ojama']))
+
+            root.add_child(list)
+
+        return root
+
+    def handle_lobby24_entry_request(self, request: Node) -> Node:
+        root = Node.void('lobby24')
+
+        lobby_num = len(self.data.local.lobby.get_all_lobbies(GameConstants.POPN_MUSIC, self.version)) + 1
+
+        root.add_child(Node.u32('no', lobby_num))
+
+        lobby_data = dict(
+            no = lobby_num, 
+            time = request.child_value('time'), 
+            ip = request.child_value('ip'),
+            local_ip = request.child_value('local_ip'),
+            port = request.child_value('port'),
+            music = request.child_value('music'),
+            sheet = request.child_value('sheet'),
+            is_ojama = request.child_value('is_ojama')
+        )
+
+        self.data.local.lobby.put_lobby(GameConstants.POPN_MUSIC, self.version, lobby_num, lobby_data)
+
+        return root
 
     def format_conversion(self, userid: UserID, profile: Profile) -> Node:
         root = Node.void("player24")

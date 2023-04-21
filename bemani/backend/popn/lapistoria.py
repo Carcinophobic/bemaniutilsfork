@@ -109,14 +109,12 @@ class PopnMusicLapistoria(PopnMusicBase):
                 },
             ],
             "bools": [
-                # We don't currently support lobbies or anything, so this is commented out until
-                # somebody gets around to implementing it.
-                # {
-                #     'name': 'Net Taisen',
-                #     'tip': 'Enable Net Taisen, including win/loss display on song select',
-                #     'category': 'game_config',
-                #     'setting': 'enable_net_taisen',
-                # },
+                {
+                    'name': 'Net Taisen',
+                    'tip': 'Enable Net Taisen, including win/loss display on song select',
+                    'category': 'game_config',
+                    'setting': 'enable_net_taisen',
+                },
                 {
                     "name": "Force Song Unlock",
                     "tip": "Force unlock all songs.",
