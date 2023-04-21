@@ -35,7 +35,6 @@ from bemani.data import Config, Data
 
 
 class PopnMusicFactory(Factory):
-
     MANAGED_CLASSES: List[Type[Base]] = [
         PopnMusic,
         PopnMusic2,

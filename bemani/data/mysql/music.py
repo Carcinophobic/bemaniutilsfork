@@ -151,19 +151,27 @@ class MusicData(BaseData):
         # Add to user score
         if new_record:
             # We want to update the timestamp/location to now if its a new record.
-            sql = (
-                "INSERT INTO `score` (`userid`, `musicid`, `points`, `data`, `timestamp`, `update`, `lid`) "
-                + "VALUES (:userid, :musicid, :points, :data, :timestamp, :update, :location) "
-                + "ON DUPLICATE KEY UPDATE data = VALUES(data), points = VALUES(points), "
-                + "timestamp = VALUES(timestamp), `update` = VALUES(`update`), lid = VALUES(lid)"
-            )
+            sql = """
+                INSERT INTO `score` (`userid`, `musicid`, `points`, `data`, `timestamp`, `update`, `lid`)
+                VALUES (:userid, :musicid, :points, :data, :timestamp, :update, :location)
+                ON DUPLICATE KEY UPDATE
+                    data = VALUES(data),
+                    points = VALUES(points),
+                    `update` = VALUES(`update`),
+                    timestamp = VALUES(timestamp),
+                    lid = VALUES(lid)
+            """
         else:
-            # We only want to add the timestamp if it is new.
-            sql = (
-                "INSERT INTO `score` (`userid`, `musicid`, `points`, `data`, `timestamp`, `update`, `lid`) "
-                + "VALUES (:userid, :musicid, :points, :data, :timestamp, :update, :location) "
-                + "ON DUPLICATE KEY UPDATE data = VALUES(data), points = VALUES(points), `update` = VALUES(`update`)"
-            )
+            # We don't want to add the timestamp of the record since it wasn't a new high score.
+            # We also don't want to update thet location since this wasn't a new record.
+            sql = """
+                INSERT INTO `score` (`userid`, `musicid`, `points`, `data`, `timestamp`, `update`, `lid`)
+                VALUES (:userid, :musicid, :points, :data, :timestamp, :update, :location)
+                ON DUPLICATE KEY UPDATE
+                    data = VALUES(data),
+                    points = VALUES(points),
+                    `update` = VALUES(`update`)
+            """
         self.execute(
             sql,
             {
@@ -213,10 +221,10 @@ class MusicData(BaseData):
         ts = timestamp if timestamp is not None else Time.now()
 
         # Add to score history
-        sql = (
-            "INSERT INTO `score_history` (userid, musicid, timestamp, lid, new_record, points, data) "
-            + "VALUES (:userid, :musicid, :timestamp, :location, :new_record, :points, :data)"
-        )
+        sql = """
+            INSERT INTO `score_history` (userid, musicid, timestamp, lid, new_record, points, data)
+            VALUES (:userid, :musicid, :timestamp, :location, :new_record, :points, :data)
+        """
         try:
             self.execute(
                 sql,
@@ -256,12 +264,30 @@ class MusicData(BaseData):
         Returns:
             The optional data stored by the game previously, or None if no score exists.
         """
-        sql = (
-            "SELECT music.songid AS songid, music.chart AS chart, score.id AS scorekey, score.timestamp AS timestamp, score.update AS `update`, score.lid AS lid, "
-            + "(select COUNT(score_history.timestamp) FROM score_history WHERE score_history.musicid = music.id AND score_history.userid = :userid) AS plays, "
-            + "score.points AS points, score.data AS data FROM score, music WHERE score.userid = :userid AND score.musicid = music.id "
-            + "AND music.game = :game AND music.version = :version AND music.songid = :songid AND music.chart = :songchart"
-        )
+        sql = """
+            SELECT
+                music.songid AS songid,
+                music.chart AS chart,
+                score.id AS scorekey,
+                score.timestamp AS timestamp,
+                score.update AS `update`,
+                score.lid AS lid,
+                (
+                    SELECT COUNT(score_history.timestamp)
+                    FROM score_history
+                    WHERE score_history.musicid = music.id AND score_history.userid = :userid
+                ) AS plays,
+                score.points AS points,
+                score.data AS data
+            FROM score, music
+            WHERE
+                score.userid = :userid AND
+                score.musicid = music.id AND
+                music.game = :game AND
+                music.version = :version AND
+                music.songid = :songid AND
+                music.chart = :songchart
+        """
         cursor = self.execute(
             sql,
             {
@@ -303,13 +329,29 @@ class MusicData(BaseData):
         Returns:
             The optional data stored by the game previously, or None if no score exists.
         """
-        sql = (
-            "SELECT music.songid AS songid, music.chart AS chart, score.id AS scorekey, score.timestamp AS timestamp, score.update AS `update`, "
-            + "score.userid AS userid, score.lid AS lid, "
-            + "(select COUNT(score_history.timestamp) FROM score_history WHERE score_history.musicid = music.id AND score_history.userid = score.userid) AS plays, "
-            + "score.points AS points, score.data AS data FROM score, music WHERE score.id = :scorekey AND score.musicid = music.id "
-            + "AND music.game = :game AND music.version = :version"
-        )
+        sql = """
+            SELECT
+                music.songid AS songid,
+                music.chart AS chart,
+                score.id AS scorekey,
+                score.timestamp AS timestamp,
+                score.update AS `update`,
+                score.userid AS userid,
+                score.lid AS lid,
+                (
+                    SELECT COUNT(score_history.timestamp)
+                    FROM score_history
+                    WHERE score_history.musicid = music.id AND score_history.userid = score.userid
+                ) AS plays,
+                score.points AS points,
+                score.data AS data
+            FROM score, music
+            WHERE
+                score.id = :scorekey AND
+                score.musicid = music.id AND
+                music.game = :game AND
+                music.version = :version
+        """
         cursor = self.execute(
             sql,
             {
@@ -357,12 +399,27 @@ class MusicData(BaseData):
         Returns:
             A list of Score objects representing all high scores for a game.
         """
-        sql = (
-            "SELECT music.songid AS songid, music.chart AS chart, score.id AS scorekey, score.timestamp AS timestamp, score.update AS `update`, score.lid AS lid, "
-            + "(select COUNT(score_history.timestamp) FROM score_history WHERE score_history.musicid = music.id AND score_history.userid = :userid) AS plays, "
-            + "score.points AS points, score.data AS data FROM score, music WHERE score.userid = :userid AND score.musicid = music.id "
-            + "AND music.game = :game AND music.version = :version"
-        )
+        sql = """
+            SELECT
+                music.songid AS songid,
+                music.chart AS chart,
+                score.id AS scorekey,
+                score.timestamp AS timestamp,
+                score.update AS `update`,
+                score.lid AS lid,
+                (
+                    select COUNT(score_history.timestamp) FROM score_history
+                    WHERE score_history.musicid = music.id AND score_history.userid = :userid
+                ) AS plays,
+                score.points AS points,
+                score.data AS data
+            FROM score, music
+            WHERE
+                score.userid = :userid AND
+                score.musicid = music.id AND
+                music.game = :game AND
+                music.version = :version
+        """
         if since is not None:
             sql = sql + " AND score.update >= :since"
         if until is not None:
@@ -378,23 +435,20 @@ class MusicData(BaseData):
             },
         )
 
-        scores = []
-        for result in cursor.fetchall():
-            scores.append(
-                Score(
-                    result["scorekey"],
-                    result["songid"],
-                    result["chart"],
-                    result["points"],
-                    result["timestamp"],
-                    result["update"],
-                    result["lid"],
-                    result["plays"],
-                    self.deserialize(result["data"]),
-                )
+        return [
+            Score(
+                result["scorekey"],
+                result["songid"],
+                result["chart"],
+                result["points"],
+                result["timestamp"],
+                result["update"],
+                result["lid"],
+                result["plays"],
+                self.deserialize(result["data"]),
             )
-
-        return scores
+            for result in cursor
+        ]
 
     def get_most_played(
         self, game: GameConstants, version: int, userid: UserID, count: int
@@ -411,22 +465,24 @@ class MusicData(BaseData):
         Returns:
             A list of tuples, containing the songid and the number of plays across all charts for that song.
         """
-        sql = (
-            "SELECT music.songid AS songid, COUNT(score_history.timestamp) AS plays FROM score_history, music "
-            + "WHERE score_history.userid = :userid AND score_history.musicid = music.id "
-            + "AND music.game = :game AND music.version = :version "
-            + "GROUP BY songid ORDER BY plays DESC LIMIT :count"
-        )
+        sql = """
+            SELECT
+                music.songid AS songid,
+                COUNT(score_history.timestamp) AS plays
+            FROM score_history, music
+            WHERE
+                score_history.userid = :userid AND
+                score_history.musicid = music.id AND
+                music.game = :game AND
+                music.version = :version
+            GROUP BY songid ORDER BY plays DESC LIMIT :count
+        """
         cursor = self.execute(
             sql,
             {"userid": userid, "game": game.value, "version": version, "count": count},
         )
 
-        most_played = []
-        for result in cursor.fetchall():
-            most_played.append((result["songid"], result["plays"]))
-
-        return most_played
+        return [(result["songid"], result["plays"]) for result in cursor]
 
     def get_last_played(
         self, game: GameConstants, version: int, userid: UserID, count: int
@@ -443,22 +499,24 @@ class MusicData(BaseData):
         Returns:
             A list of tuples, containing the songid and the last played time for this song.
         """
-        sql = (
-            "SELECT DISTINCT(music.songid) AS songid, score_history.timestamp AS timestamp FROM score_history, music "
-            + "WHERE score_history.userid = :userid AND score_history.musicid = music.id "
-            + "AND music.game = :game AND music.version = :version "
-            + "ORDER BY timestamp DESC LIMIT :count"
-        )
+        sql = """
+            SELECT
+                DISTINCT(music.songid) AS songid,
+                score_history.timestamp AS timestamp
+            FROM score_history, music
+            WHERE
+                score_history.userid = :userid AND
+                score_history.musicid = music.id AND
+                music.game = :game AND
+                music.version = :version
+            ORDER BY timestamp DESC LIMIT :count
+        """
         cursor = self.execute(
             sql,
             {"userid": userid, "game": game.value, "version": version, "count": count},
         )
 
-        last_played = []
-        for result in cursor.fetchall():
-            last_played.append((result["songid"], result["timestamp"]))
-
-        return last_played
+        return [(result["songid"], result["timestamp"]) for result in cursor]
 
     def get_hit_chart(
         self,
@@ -478,10 +536,16 @@ class MusicData(BaseData):
         Returns:
             A list of tuples, containing the songid and the number of plays across all charts for that song.
         """
-        sql = (
-            "SELECT music.songid AS songid, COUNT(score_history.timestamp) AS plays FROM score_history, music "
-            + "WHERE score_history.musicid = music.id AND music.game = :game AND music.version = :version "
-        )
+        sql = """
+            SELECT
+                music.songid AS songid,
+                COUNT(score_history.timestamp) AS plays
+            FROM score_history, music
+            WHERE
+                score_history.musicid = music.id AND
+                music.game = :game AND
+                music.version = :version
+        """
         timestamp: Optional[int] = None
         if days is not None:
             # Only select the last X days of hit chart
@@ -499,11 +563,7 @@ class MusicData(BaseData):
             },
         )
 
-        most_played = []
-        for result in cursor.fetchall():
-            most_played.append((result["songid"], result["plays"]))
-
-        return most_played
+        return [(result["songid"], result["plays"]) for result in cursor]
 
     def get_song(
         self,
@@ -524,11 +584,19 @@ class MusicData(BaseData):
         Returns:
             A Song object representing the song details
         """
-        sql = (
-            "SELECT music.name AS name, music.artist AS artist, music.genre AS genre, music.data AS data "
-            + "FROM music WHERE music.game = :game AND music.version = :version AND "
-            + "music.songid = :songid AND music.chart = :songchart"
-        )
+        sql = """
+            SELECT
+                music.name AS name,
+                music.artist AS artist,
+                music.genre AS genre,
+                music.data AS data
+            FROM music
+            WHERE
+                music.game = :game AND
+                music.version = :version AND
+                music.songid = :songid AND
+                music.chart = :songchart
+        """
         cursor = self.execute(
             sql,
             {
@@ -568,10 +636,10 @@ class MusicData(BaseData):
         Returns:
             A list of Song objects detailing the song information for each song.
         """
-        sql = (
-            "SELECT version, songid, chart, name, artist, genre, data FROM music "
-            "WHERE music.game = :game"
-        )
+        sql = """
+            SELECT version, songid, chart, name, artist, genre, data
+            FROM music WHERE music.game = :game
+        """
         params: Dict[str, Any] = {"game": game.value}
         if version is not None:
             sql += " AND music.version = :version"
@@ -580,66 +648,19 @@ class MusicData(BaseData):
             sql += " ORDER BY music.version DESC"
         cursor = self.execute(sql, params)
 
-        all_songs = []
-        for result in cursor.fetchall():
-            all_songs.append(
-                Song(
-                    game,
-                    result["version"],
-                    result["songid"],
-                    result["chart"],
-                    result["name"],
-                    result["artist"],
-                    result["genre"],
-                    self.deserialize(result["data"]),
-                )
+        return [
+            Song(
+                game,
+                result["version"],
+                result["songid"],
+                result["chart"],
+                result["name"],
+                result["artist"],
+                result["genre"],
+                self.deserialize(result["data"]),
             )
-
-        return all_songs
-
-    def get_all_versions_of_song(
-        self,
-        game: GameConstants,
-        version: int,
-        songid: int,
-        songchart: int,
-        interested_versions: Optional[List[int]] = None,
-    ) -> List[Song]:
-        """
-        Given a game/version/songid/chart, look up all versions of that song across all game versions.
-
-        Parameters:
-            game - Enum value representing a game series.
-            version - Integer representing which version of the game.
-            songid - Integer representing the ID (from the game) for this song.
-            songchart - Integer representing the chart for this song.
-
-        Returns:
-            A list of Song objects representing all song versions.
-        """
-        musicid = self.__get_musicid(game, version, songid, songchart)
-        sql = (
-            "SELECT version, songid, chart, name, artist, genre, data FROM music "
-            "WHERE music.id = :musicid"
-        )
-        if interested_versions is not None:
-            sql += f" AND music.version in ({','.join(str(int(v)) for v in interested_versions)})"
-        cursor = self.execute(sql, {"musicid": musicid})
-        all_songs = []
-        for result in cursor.fetchall():
-            all_songs.append(
-                Song(
-                    game,
-                    result["version"],
-                    result["songid"],
-                    result["chart"],
-                    result["name"],
-                    result["artist"],
-                    result["genre"],
-                    self.deserialize(result["data"]),
-                )
-            )
-        return all_songs
+            for result in cursor
+        ]
 
     def get_all_scores(
         self,
@@ -682,10 +703,20 @@ class MusicData(BaseData):
             innerselect = innerselect + " AND chart = :songchart"
 
         # Finally, construct the full query
-        sql = (
-            "SELECT ({}) AS songid, ({}) AS chart, id AS scorekey, points, timestamp, `update`, lid, data, userid, ({}) AS plays "
-            "FROM score WHERE musicid IN ({})"
-        ).format(songidquery, chartquery, playselect, innerselect)
+        sql = f"""
+            SELECT
+                ({songidquery}) AS songid,
+                ({chartquery}) AS chart,
+                id AS scorekey,
+                points,
+                timestamp,
+                `update`,
+                lid,
+                data,
+                userid,
+                ({playselect}) AS plays
+            FROM score WHERE musicid IN ({innerselect})
+        """
 
         # Now, limit the query
         if userid is not None:
@@ -710,26 +741,23 @@ class MusicData(BaseData):
         )
 
         # Objectify result
-        scores = []
-        for result in cursor.fetchall():
-            scores.append(
-                (
-                    UserID(result["userid"]),
-                    Score(
-                        result["scorekey"],
-                        result["songid"],
-                        result["chart"],
-                        result["points"],
-                        result["timestamp"],
-                        result["update"],
-                        result["lid"],
-                        result["plays"],
-                        self.deserialize(result["data"]),
-                    ),
-                )
+        return [
+            (
+                UserID(result["userid"]),
+                Score(
+                    result["scorekey"],
+                    result["songid"],
+                    result["chart"],
+                    result["points"],
+                    result["timestamp"],
+                    result["update"],
+                    result["lid"],
+                    result["plays"],
+                    self.deserialize(result["data"]),
+                ),
             )
-
-        return scores
+            for result in cursor
+        ]
 
     def get_all_records(
         self,
@@ -788,39 +816,49 @@ class MusicData(BaseData):
             params["userlist"] = tuple(userlist)
         else:
             user_sql = f"SELECT userid FROM score WHERE score.musicid = played.musicid {location_sql} ORDER BY points DESC, timestamp DESC LIMIT 1"
-        records_sql = (
-            f"SELECT ({user_sql}) AS userid, musicid FROM ({musicid_sql}) played"
-        )
+        records_sql = f"""
+            SELECT ({user_sql}) AS userid, musicid
+            FROM ({musicid_sql}) played
+        """
 
         # Now, join it up against the score and music table to grab the info we need
-        sql = (
-            "SELECT ({}) AS songid, ({}) AS chart, score.points AS points, score.userid AS userid, score.id AS scorekey, score.data AS data, "
-            + "score.timestamp AS timestamp, score.update AS `update`, "
-            + "score.lid AS lid, (select COUNT(score_history.timestamp) FROM score_history WHERE score_history.musicid = score.musicid) AS plays "
-            + "FROM score, ({}) records WHERE records.userid = score.userid AND records.musicid = score.musicid"
-        ).format(songidquery, chartquery, records_sql)
+        sql = f"""
+            SELECT
+                ({songidquery}) AS songid,
+                ({chartquery}) AS chart,
+                score.points AS points,
+                score.userid AS userid,
+                score.id AS scorekey,
+                score.data AS data,
+                score.timestamp AS timestamp,
+                score.update AS `update`,
+                score.lid AS lid,
+                (
+                    SELECT COUNT(score_history.timestamp) FROM score_history
+                    WHERE score_history.musicid = score.musicid
+                ) AS plays
+            FROM score, ({records_sql}) records
+            WHERE records.userid = score.userid AND records.musicid = score.musicid
+        """
         cursor = self.execute(sql, params)
 
-        scores = []
-        for result in cursor.fetchall():
-            scores.append(
-                (
-                    UserID(result["userid"]),
-                    Score(
-                        result["scorekey"],
-                        result["songid"],
-                        result["chart"],
-                        result["points"],
-                        result["timestamp"],
-                        result["update"],
-                        result["lid"],
-                        result["plays"],
-                        self.deserialize(result["data"]),
-                    ),
-                )
+        return [
+            (
+                UserID(result["userid"]),
+                Score(
+                    result["scorekey"],
+                    result["songid"],
+                    result["chart"],
+                    result["points"],
+                    result["timestamp"],
+                    result["update"],
+                    result["lid"],
+                    result["plays"],
+                    self.deserialize(result["data"]),
+                ),
             )
-
-        return scores
+            for result in cursor
+        ]
 
     def get_attempt_by_key(
         self, game: GameConstants, version: int, key: int
@@ -836,11 +874,24 @@ class MusicData(BaseData):
         Returns:
             The optional data stored by the game previously, or None if no score exists.
         """
-        sql = (
-            "SELECT music.songid AS songid, music.chart AS chart, score_history.id AS scorekey, score_history.timestamp AS timestamp, score_history.userid AS userid, "
-            + "score_history.lid AS lid, score_history.new_record AS new_record, score_history.points AS points, score_history.data AS data FROM score_history, music "
-            + "WHERE score_history.id = :scorekey AND score_history.musicid = music.id AND music.game = :game AND music.version = :version"
-        )
+        sql = """
+            SELECT
+                music.songid AS songid,
+                music.chart AS chart,
+                score_history.id AS scorekey,
+                score_history.timestamp AS timestamp,
+                score_history.userid AS userid,
+                score_history.lid AS lid,
+                score_history.new_record AS new_record,
+                score_history.points AS points,
+                score_history.data AS data
+            FROM score_history, music
+            WHERE
+                score_history.id = :scorekey AND
+                score_history.musicid = music.id AND
+                music.game = :game AND
+                music.version = :version
+        """
         cursor = self.execute(
             sql,
             {
@@ -863,7 +914,7 @@ class MusicData(BaseData):
                 result["points"],
                 result["timestamp"],
                 result["lid"],
-                True if result["new_record"] == 1 else False,
+                result["new_record"] == 1,
                 self.deserialize(result["data"]),
             ),
         )
@@ -907,10 +958,19 @@ class MusicData(BaseData):
             innerselect = innerselect + " AND chart = :songchart"
 
         # Finally, construct the full query
-        sql = (
-            "SELECT ({}) AS songid, ({}) AS chart, id AS scorekey, timestamp, points, new_record, lid, data, userid "
-            "FROM score_history WHERE musicid IN ({})"
-        ).format(songidquery, chartquery, innerselect)
+        sql = f"""
+            SELECT
+                ({songidquery}) AS songid,
+                ({chartquery}) AS chart,
+                id AS scorekey,
+                timestamp,
+                points,
+                new_record,
+                lid,
+                data,
+                userid
+            FROM score_history WHERE musicid IN ({innerselect})
+        """
 
         # Now, limit the query
         if userid is not None:
@@ -939,22 +999,19 @@ class MusicData(BaseData):
         )
 
         # Now objectify the attempts
-        attempts = []
-        for result in cursor.fetchall():
-            attempts.append(
-                (
-                    UserID(result["userid"]) if result["userid"] > 0 else None,
-                    Attempt(
-                        result["scorekey"],
-                        result["songid"],
-                        result["chart"],
-                        result["points"],
-                        result["timestamp"],
-                        result["lid"],
-                        True if result["new_record"] == 1 else False,
-                        self.deserialize(result["data"]),
-                    ),
-                )
+        return [
+            (
+                UserID(result["userid"]) if result["userid"] > 0 else None,
+                Attempt(
+                    result["scorekey"],
+                    result["songid"],
+                    result["chart"],
+                    result["points"],
+                    result["timestamp"],
+                    result["lid"],
+                    result["new_record"] == 1,
+                    self.deserialize(result["data"]),
+                ),
             )
-
-        return attempts
+            for result in cursor
+        ]

@@ -21,8 +21,7 @@ from bemani.data import Data, UserID, Score
 from bemani.protocol import Node
 
 
-class IIDXBistrover(IIDXCourse, IIDXBase):
-
+class IIDXBistrover(IIDXBase):
     name: str = "Beatmania IIDX BISTROVER"
     version: int = VersionConstants.IIDX_BISTROVER
 

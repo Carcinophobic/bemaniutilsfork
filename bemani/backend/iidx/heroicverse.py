@@ -21,8 +21,7 @@ from bemani.data import Data, UserID, Score
 from bemani.protocol import Node
 
 
-class IIDXHeroicVerse(IIDXCourse, IIDXBase):
-
+class IIDXHeroicVerse(IIDXBase):
     name: str = "Beatmania IIDX HEROIC VERSE"
     version: int = VersionConstants.IIDX_HEROIC_VERSE
 

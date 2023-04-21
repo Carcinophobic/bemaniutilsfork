@@ -38,7 +38,6 @@ class _BytesEncoder(json.JSONEncoder):
 
 
 class BaseData:
-
     SESSION_LENGTH: Final[int] = 32
 
     def __init__(self, config: Config, conn: Connection) -> None:
@@ -173,10 +172,10 @@ class BaseData:
                 expiration = Time.now() + expiration
 
                 # Use that session
-                sql = (
-                    "INSERT INTO session (id, session, type, expiration) "
-                    + "VALUES (:id, :session, :optype, :expiration)"
-                )
+                sql = """
+                    INSERT INTO session (id, session, type, expiration)
+                    VALUES (:id, :session, :optype, :expiration)
+                """
                 cursor = self.execute(
                     sql,
                     {

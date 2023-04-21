@@ -75,7 +75,7 @@ class NetworkData(BaseData):
                 result["title"],
                 result["body"],
             )
-            for result in cursor.fetchall()
+            for result in cursor
         ]
 
     def create_news(self, title: str, body: str) -> int:
@@ -170,11 +170,14 @@ class NetworkData(BaseData):
                 "Logic error, specify either 'daily' or 'weekly' for schedule type!"
             )
 
-        sql = (
-            "SELECT year, day FROM scheduled_work "
-            "WHERE game = :game AND version = :version AND "
-            "name = :name AND schedule = :schedule"
-        )
+        sql = """
+            SELECT year, day FROM scheduled_work
+            WHERE
+                game = :game AND
+                version = :version AND
+                name = :name AND
+                schedule = :schedule
+        """
         cursor = self.execute(
             sql,
             {
@@ -219,11 +222,11 @@ class NetworkData(BaseData):
 
         if schedule == "daily":
             year, day = Time.days_into_year()
-            sql = (
-                "INSERT INTO scheduled_work (game, version, name, schedule, year, day) "
-                + "VALUES (:game, :version, :name, :schedule, :year, :day) "
-                + "ON DUPLICATE KEY UPDATE year=VALUES(year), day=VALUES(day)"
-            )
+            sql = """
+                INSERT INTO scheduled_work (game, version, name, schedule, year, day)
+                VALUES (:game, :version, :name, :schedule, :year, :day)
+                ON DUPLICATE KEY UPDATE year=VALUES(year), day=VALUES(day)
+            """
             self.execute(
                 sql,
                 {
@@ -238,11 +241,11 @@ class NetworkData(BaseData):
 
         if schedule == "weekly":
             days = Time.week_in_days_since_epoch()
-            sql = (
-                "INSERT INTO scheduled_work (game, version, name, schedule, day) "
-                + "VALUES (:game, :version, :name, :schedule, :day) "
-                + "ON DUPLICATE KEY UPDATE day=VALUES(day)"
-            )
+            sql = """
+                INSERT INTO scheduled_work (game, version, name, schedule, day)
+                VALUES (:game, :version, :name, :schedule, :day)
+                ON DUPLICATE KEY UPDATE day=VALUES(day)
+            """
             self.execute(
                 sql,
                 {
@@ -318,27 +321,20 @@ class NetworkData(BaseData):
                 "until_id": until_id,
             },
         )
-        events = []
-        for result in cursor.fetchall():
-            if result["userid"] is not None:
-                userid = UserID(result["userid"])
-            else:
-                userid = None
-            if result["arcadeid"] is not None:
-                arcadeid = ArcadeID(result["arcadeid"])
-            else:
-                arcadeid = None
-            events.append(
-                Event(
-                    result["id"],
-                    result["timestamp"],
-                    userid,
-                    arcadeid,
-                    result["type"],
-                    self.deserialize(result["data"]),
-                ),
+
+        return [
+            Event(
+                result["id"],
+                result["timestamp"],
+                UserID(result["userid"]) if result["userid"] is not None else None,
+                ArcadeID(result["arcadeid"])
+                if result["arcadeid"] is not None
+                else None,
+                result["type"],
+                self.deserialize(result["data"]),
             )
-        return events
+            for result in cursor
+        ]
 
     def delete_events(self, oldest_event_ts: int) -> None:
         """
