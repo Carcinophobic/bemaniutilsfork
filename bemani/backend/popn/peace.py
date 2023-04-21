@@ -151,7 +151,7 @@ class PopnMusicPeace(PopnMusicModernBase):
         music_phase = game_config.get_int("music_phase")
         event_archive_phase = game_config.get_int("event_archive_phase")
         holiday_greeting = game_config.get_int("holiday_greeting")
-        enable_net_taisen = False  # game_config.get_bool('enable_net_taisen')
+        enable_net_taisen = game_config.get_bool('enable_net_taisen')
         navikun_phase = game_config.get_int("navikun_phase")
 
         # Event phases

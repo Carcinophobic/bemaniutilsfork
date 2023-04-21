@@ -217,7 +217,7 @@ class PopnMusicKaimei(PopnMusicModernBase):
         game_config = self.get_game_config()
         music_phase = game_config.get_int("music_phase")
         holiday_greeting = game_config.get_int("holiday_greeting")
-        enable_net_taisen = False  # game_config.get_bool('enable_net_taisen')
+        enable_net_taisen = game_config.get_bool('enable_net_taisen')
         mn_tanteisha_phase = game_config.get_int("mn_tanteisha_phase")
         peace_soundtrack = game_config.get_int("peace_soundtrack")
         tanteisha_joshu = game_config.get_int("tanteisha_joshu")

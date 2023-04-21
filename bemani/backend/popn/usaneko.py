@@ -126,7 +126,7 @@ class PopnMusicUsaNeko(PopnMusicModernBase):
         holiday_greeting = game_config.get_int("holiday_greeting")
         active_event = game_config.get_int("active_event")
         navikun_phase = game_config.get_int("navikun_phase")
-        enable_net_taisen = False  # game_config.get_bool('enable_net_taisen')
+        enable_net_taisen = game_config.get_bool('enable_net_taisen')
 
         navikun_enabled = active_event == 1
         daily_mission_enabled = active_event == 2

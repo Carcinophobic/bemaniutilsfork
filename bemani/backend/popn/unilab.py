@@ -59,7 +59,7 @@ class PopnMusicUniLab(PopnMusicModernBase):
 
     def get_common_config(self) -> Tuple[Dict[int, int], bool]:
         game_config = self.get_game_config()
-        enable_net_taisen = False  # game_config.get_bool('enable_net_taisen')
+        enable_net_taisen = game_config.get_bool('enable_net_taisen')
 
         # Event phases
         return (
